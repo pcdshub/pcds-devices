@@ -6,7 +6,6 @@ import time
 from collections import defaultdict
 from datetime import date
 
-import numpy as np
 from ophyd.device import Component as Cpt
 from ophyd.device import FormattedComponent as FCpt
 from pcdscalc import be_lens_calcs as calcs
@@ -67,6 +66,9 @@ class Prefocus(CombinedInOutRecordPositioner, LightpathInOutMixin):
     # In should be everything except state 0 (Unknown) and state 1 (Out)
     _in_if_not_out = True
 
+    tab_whitelist = ['x', 'y']
+    tab_component_names = True
+
     def __init__(self, prefix, *, name, **kwargs):
         # Set default transmission
         # Done this way because states are still unknown at this point
@@ -76,6 +78,9 @@ class Prefocus(CombinedInOutRecordPositioner, LightpathInOutMixin):
                                          else (1 if state in self.out_states
                                                else 0))
         super().__init__(prefix, name=name, **kwargs)
+        # motor aliases
+        self.x = self.x_motor
+        self.y = self.y_motor
 
 
 class LensStackBase(BaseInterface, PseudoPositioner):
@@ -124,23 +129,25 @@ class LensStackBase(BaseInterface, PseudoPositioner):
     y = FCpt(IMS, '{self.y_prefix}')
     z = FCpt(IMS, '{self.z_prefix}')
 
-    calib_z = Cpt(PseudoSingleInterface)
-    beam_size = Cpt(PseudoSingleInterface)
+    calib_z = Cpt(PseudoSingleInterface, egu='m')
+    beam_size = Cpt(PseudoSingleInterface, egu='m')
 
     tab_whitelist = ['tweak', 'align', 'calib_z', 'beam_size', 'create_lens',
                      'read_lens']
     tab_component_names = True
 
     def __init__(self, x_prefix, y_prefix, z_prefix, lens_set,
-                 z_offset, z_dir, E, att_obj, lcls_obj=None,
-                 mono_obj=None, *args, **kwargs):
+                 z_offset, z_dir, E, att_obj, fwhm_unfocused=None,
+                 lcls_obj=None, mono_obj=None, *args, **kwargs):
         self.x_prefix = x_prefix
         self.y_prefix = y_prefix
         self.z_prefix = z_prefix
         self.z_dir = z_dir
         self.z_offset = z_offset
+        self.fwhm_unfocused = fwhm_unfocused or 500e-6
 
-        self._E = E
+        self._E = None
+        self._which_E = None
         self._att_obj = att_obj
         self._lcls_obj = lcls_obj
         self._mono_obj = mono_obj
@@ -149,6 +156,45 @@ class LensStackBase(BaseInterface, PseudoPositioner):
         self.lens_set = lens_set
 
         super().__init__(x_prefix, *args, **kwargs)
+
+    @property
+    def energy(self):
+        """
+        Get the energy from various sources based on current situation:
+        - If self.energy = <energy> has been used, it will return the
+          the user-defined energy
+        - If self._mono_obj is defined and inserted, it will return the
+          current mono energy
+        - Return the LCLS energy otherwise
+        """
+        if self._E is not None:
+            self._which_E = "User"
+            return self._E
+        elif self._mono_obj is not None:
+            if self._mono_obj.inserted:
+                self._which_E = 'ccm'
+                return self._mono_obj.energy.energy.get().readback
+            else:
+                print('CCM not in, defaulting to LCLS energy')
+
+        if self._lcls_obj is not None:
+            self._which_E = 'lcls'
+            return self._lcls_obj.hard_e_energy.get()
+
+    @energy.setter
+    def energy(self, energy):
+        self._E = energy
+
+    def get_current_beam_info(self):
+        """
+        Calculates the beam size (FWHM) at the IP for the current lens
+        positin (distance to the interaction point).
+        """
+        dist_m = self.z.position / 1000 * self.z_dir + self.z_offset
+        beamsize = calcs.calc_beam_fwhm(self.energy, self.lens_set, distance=dist_m,
+                                        fwhm_unfocused=self.fwhm_unfocused)
+        print(f"Distance for beamsize {beamsize}: {dist_m}m")
+        return
 
     def tweak(self):
         """
@@ -186,11 +232,13 @@ class LensStackBase(BaseInterface, PseudoPositioner):
         AttributeError
             If pseudo motor is not setup for use.
         """
-        if not np.isclose(pseudo_pos.beam_size, self.beam_size.position):
+        # if not np.isclose(pseudo_pos.beam_size, self.beam_size.position):
+        if True:
             beam_size = pseudo_pos.beam_size
             dist = calcs.calc_distance_for_size(beam_size, self.lens_set,
-                                                self._E)[0]
+                                                self.energy)[0]
             z_pos = (dist - self.z_offset) * self.z_dir * 1000
+            # z_pos = z_pos - 100  # dirty trick to get z in the range
         else:
             z_pos = pseudo_pos.calib_z
         try:
@@ -228,9 +276,9 @@ class LensStackBase(BaseInterface, PseudoPositioner):
             PseudoPosition
         """
         dist_m = real_pos.z / 1000 * self.z_dir + self.z_offset
-        logger.info('dist_m %s', dist_m)
-        beamsize = calcs.calc_beam_fwhm(self._E, self.lens_set,
-                                        distance=dist_m)
+        beamsize = calcs.calc_beam_fwhm(self.energy, self.lens_set,
+                                        distance=dist_m,
+                                        printsummary=False)
         return self.PseudoPosition(calib_z=real_pos.z, beam_size=beamsize)
 
     def align(self, z_position=None, edge_offset=20):
@@ -302,8 +350,9 @@ class LensStackBase(BaseInterface, PseudoPositioner):
             positioner instance.
         """
         if self._make_safe() is True:
-            return super().move(position, wait=wait, timeout=timeout,
-                                moved_cb=moved_cb)
+            st = super().move(position, wait=wait, timeout=timeout,
+                              moved_cb=moved_cb)
+            return st
         else:
             logger.warning('Aborting moving for safety.')
             return
@@ -322,20 +371,30 @@ class LensStackBase(BaseInterface, PseudoPositioner):
             logger.warning('Cannot do safe moveZ, no attenuator'
                            ' object provided.')
             return False
-        filt, thk = self._att_obj.filters[0], 0
-        for f in self._att_obj.filters:
-            t = f.thickness.get()
-            if t > thk:
-                filt, thk = f, t
-        if not filt.inserted:
-            filt.insert()
+        if 'Attenuator' in self._att_obj.__class__.__name__:
+            filt, thk = self._att_obj.filters[0], 0
+            for f in self._att_obj.filters:
+                t = f.thickness.get()
+                if t > thk:
+                    filt, thk = f, t
+            if not filt.inserted:
+                filt.insert(wait=True)
+                time.sleep(0.01)
+            if filt.inserted:
+                logger.info('Beam stop attenuator moved in!')
+                safe = True
+            else:
+                logger.warning('Beam stop attenuator did not move in!')
+                safe = False
+        elif 'PulsePicker' in self._att_obj.__class__.__name__:
+            self._att_obj.close(wait=True)
             time.sleep(0.01)
-        if filt.inserted:
-            logger.info('Beam stop attenuator moved in!')
-            safe = True
-        else:
-            logger.warning('Beam stop attenuator did not move in!')
-            safe = False
+            if self._att_obj.inserted:
+                logger.info('Pulse picker closed!')
+                safe = True
+            else:
+                logger.warning('Pulse picker did not close!')
+                safe = False
         return safe
 
 
@@ -359,7 +418,8 @@ class LensStack(LensStackBase):
         1 or -1, represents beam direction wrt z direction.
     E: number, optional
         Beam energy
-    att_obj : attenuator object, optional
+    att_obj : attenuator object, optional. Can be the beamline attenuator or
+              the pulse-picker. Used to block the beam while lens stack is moving.
     lcls_obj
         Object that gets PVs from lcls (for energy)
     mono_obj
@@ -530,11 +590,13 @@ class LensStack(LensStackBase):
 
         if lens_set is None:
             # Defaulting this a the first set in the file for now
-            lens_set = calcs.get_lens_set(1, self.path)
+            self.lens_set = calcs.get_lens_set(1, self.path)
+        else:
+            self.lens_set = lens_set
 
         super().__init__(
             x_prefix, y_prefix, z_prefix, lens_set, z_offset, z_dir, E,
-            att_obj, *args, **kwargs
+            att_obj, lcls_obj, mono_obj, *args, **kwargs
         )
 
     def read_lens(self, print_only=False):

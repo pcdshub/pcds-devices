@@ -9,6 +9,7 @@ from lightpath import LightpathState
 from ophyd.device import Component as Cpt
 from ophyd.device import Device
 from ophyd.device import FormattedComponent as FCpt
+from ophyd.pseudopos import pseudo_position_argument, real_position_argument
 from ophyd.signal import EpicsSignal, EpicsSignalRO, Signal
 from ophyd.status import MoveStatus
 
@@ -589,6 +590,7 @@ class CCMEnergy(FltMvInterface, PseudoPositioner, CCMConstantsMixin):
         ref2 = self.alio_to_energy(value + res_delta/2)
         self.resolution.put(abs((ref1 - ref2) / res_delta), force=True)
 
+    @pseudo_position_argument
     def forward(self, pseudo_pos: namedtuple) -> namedtuple:
         """
         PseudoPositioner interface function for calculating the setpoint.
@@ -600,6 +602,7 @@ class CCMEnergy(FltMvInterface, PseudoPositioner, CCMConstantsMixin):
         alio = self.energy_to_alio(energy)
         return self.RealPosition(alio=alio)
 
+    @real_position_argument
     def inverse(self, real_pos: namedtuple) -> namedtuple:
         """
         PseudoPositioner interface function for calculating the readback.
@@ -747,6 +750,7 @@ class CCMEnergyWithVernier(CCMEnergy):
             self.hutch = 'TST'
         super().__init__(prefix, **kwargs)
 
+    @pseudo_position_argument
     def forward(self, pseudo_pos: namedtuple) -> namedtuple:
         """
         PseudoPositioner interface function for calculating the setpoint.
@@ -761,6 +765,7 @@ class CCMEnergyWithVernier(CCMEnergy):
         vernier = energy * 1000
         return self.RealPosition(alio=alio, acr_energy=vernier)
 
+    @real_position_argument
     def inverse(self, real_pos: namedtuple) -> namedtuple:
         """
         PseudoPositioner interface function for calculating the readback.
