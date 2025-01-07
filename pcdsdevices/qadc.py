@@ -1,19 +1,18 @@
 from ophyd import Component as Cpt
 from ophyd import Device, EpicsSignal
+from ophyd import FormattedComponent as FCpt
 
 from .interface import BaseInterface
 from .variety import set_metadata
+
+# Qadc == Abaco FMC126 Digitzier
+# Qadc134 == Abaco FMC134 Digitizer
 
 
 class QadcCommon(BaseInterface, Device):
     """
     Common class for Abaco FMC digitizers. Used in Qadc and Qadc134.
     """
-
-    ch0 = Cpt(EpicsSignal, ":CH0", kind="normal", doc="Input 0 of the ADC")
-    ch1 = Cpt(EpicsSignal, ":CH1", kind="normal", doc="Input 1 of the ADC")
-    ch2 = Cpt(EpicsSignal, ":CH2", kind="normal", doc="Input 2 of the ADC")
-    ch3 = Cpt(EpicsSignal, ":CH3", kind="normal", doc="Input 3 of the ADC")
     config = Cpt(EpicsSignal, ":CONFIG", kind="config",
                  doc="Write the current config to the QADC")
     set_metadata(config, dict(variety='command-proc', value=1))
@@ -51,10 +50,83 @@ class QadcLcls2Timing(BaseInterface, Device):
                          doc="Trigger partition number")
 
 
+class Qadc134Waveform(BaseInterface, Device):
+    """
+    Common class for Qadc134 waveforms. Includes common settings and controls
+    for these waveforms, like averaging and background correction.
+    """
+    enable_averaging = FCpt(
+        EpicsSignal, "{self.prefix}:ENABLE_AVERAGE_{self.chan}",
+        kind="config", doc="Enable signal averaging"
+    )
+    n_average = FCpt(
+        EpicsSignal, "{self.prefix}:N_AVERAGE_{self.chan}", kind="config",
+        doc="Number of waveforms to average"
+    )
+    average = FCpt(
+        EpicsSignal, "{self.prefix}:AVERAGE_{self.chan}", kind="normal",
+        doc="Averaged waveform"
+    )
+
+    bg_enable = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_BGCORR", kind="config",
+        doc="Enable bacground correction"
+    )
+    bg_start = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_BGSTART", kind="config",
+        doc="Background start (64 sample increments)"
+    )
+    bg_end = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_BGEND", kind="config",
+        doc="Background end (64 sample increments)"
+    )
+
+    cfd_enable = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_CFDEN", kind="config",
+        doc="Enable CFD edge finding algorithm"
+    )
+    cfd_delay = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_CFDEL", kind="config",
+        doc="CFD delay, in pixels"
+    )
+    cfd_threshold = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_CFDTH", kind="config",
+        doc="CFD threshold, in volts"
+    )
+    cfd_edges = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_CFD_EDGES", kind="normal",
+        doc="Array of up to 10 detected edges (in ns)"
+    )
+    cfd_edges = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_CFD_INDICES", kind="normal",
+        doc="Array of up to 10 detected edge indices (in pixel)"
+    )
+    cfd_edge_1 = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_EDGE1", kind="normal",
+        doc="First detected edge (cfd_edges[0])"
+    )
+    cfd_edge_2 = FCpt(
+        EpicsSignal, "{self.prefix}:{self.chan}_EDGE2", kind="normal",
+        doc="First detected edge (cfd_edges[1])"
+    )
+
+    def __init__(self, prefix, chan=None, **kwargs):
+        self.chan = chan
+        super().__init__(prefix, **kwargs)
+
+
 class Qadc134Common(QadcCommon):
     """
     Common class for FMC134 digitizers.
     """
+    ch0 = Cpt(Qadc134Waveform, '', chan="CH0", kind="normal",
+              doc="Input 0 of the ADC")
+    ch1 = Cpt(Qadc134Waveform, '', chan="CH1", kind="normal",
+              doc="Input 1 of the ADC")
+    ch2 = Cpt(Qadc134Waveform, '', chan="CH2", kind="normal",
+              doc="Input 2 of the ADC")
+    ch3 = Cpt(Qadc134Waveform, '', chan="CH3", kind="normal",
+              doc="Input 3 of the ADC")
     trig_delay = Cpt(
         EpicsSignal, ":TRIG_DELAY_RBV", write_pv=":TRIG_DELAY", kind="config",
         doc="Trigger delay in EVR/TPR ticks"
@@ -93,16 +165,18 @@ class Qadc134Common(QadcCommon):
     clear_config = Cpt(EpicsSignal, ":CLEAR_CONFIG", kind="config",
                        doc="Clear the current configuration")
     set_metadata(clear_config, dict(variety='command-proc', value=1))
-    out0 = Cpt(EpicsSignal, ":OUT0", kind="normal", doc="Full output zero")
-    out1 = Cpt(EpicsSignal, ":OUT1", kind="normal", doc="Full output one")
+    out0 = Cpt(Qadc134Waveform, '', chan="OUT0", kind="normal",
+               doc="Interleaved waveform 0 of the ADC")
+    out1 = Cpt(Qadc134Waveform, '', chan="OUT1", kind="normal",
+               doc="Interleaved waveform 1 of the ADC")
     rawdata0 = Cpt(EpicsSignal, ":RAWDATA0", kind="normal",
                    doc="Raw output zero")
     rawdata1 = Cpt(EpicsSignal, ":RAWDATA1", kind="normal",
                    doc="Raw output one")
-    sparse0 = Cpt(EpicsSignal, ":SPARSE0", kind="normal",
-                  doc="Sparsified output zero")
-    sparse1 = Cpt(EpicsSignal, ":SPARSE1", kind="normal",
-                  doc="Sparsified output one")
+    sparse0 = Cpt(Qadc134Waveform, '', chan="SPARSE0", kind="normal",
+                  doc="Sparsified waveform 0 of the ADC")
+    sparse1 = Cpt(Qadc134Waveform, '', chan="SPARSE1", kind="normal",
+                  doc="Sparsified waveform 1 of the ADC")
 
 
 class Qadc134(Qadc134Common, QadcLcls1Timing):
@@ -121,6 +195,10 @@ class Qadc(QadcCommon):
     """
     Class for an older Abaco FMC PCIe digitzer, used in the LCLS-I hutches.
     """
+    ch0 = Cpt(EpicsSignal, ":CH0", kind="normal", doc="Input 0 of the ADC")
+    ch1 = Cpt(EpicsSignal, ":CH1", kind="normal", doc="Input 1 of the ADC")
+    ch2 = Cpt(EpicsSignal, ":CH2", kind="normal", doc="Input 2 of the ADC")
+    ch3 = Cpt(EpicsSignal, ":CH3", kind="normal", doc="Input 3 of the ADC")
 
     gain0_i = Cpt(EpicsSignal, ":GAIN0_I", kind="config")
     gain0_ni = Cpt(EpicsSignal, ":GAIN0_NI", kind="config")
