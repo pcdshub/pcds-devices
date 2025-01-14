@@ -6,15 +6,15 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Signal Classes &mdash; PCDS Devices 8.6.1.dev172+gaf3a7e77 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+  <title>Signal Classes &mdash; PCDS Devices 8.7.1.dev10+gbec57ae1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/_static/theme_overrides.css" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=7a7007f6"></script>
+      <script src="_static/documentation_options.js?v=8f76444c"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/docs-versions-menu.js?v=3d6a1aea"></script>
@@ -137,7 +137,7 @@ embedded in Device class hierarchies.</p>
 <p>AggregateSignal handles configuring callbacks for you such that you will only
 need to define a single calculation function in order to use it.</p>
 <p>In your subclass, you should define a method such as:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_calc_readback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_calc_readback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The calculation method you should implement.&quot;&quot;&quot;</span>
     <span class="c1"># Access `._signals` here to calculate your value.</span>
     <span class="k">return</span> <span class="mf">10.0</span>
@@ -160,17 +160,17 @@ Channel Access calls will not be necessary when using the provided cache.</p></l
 <p>The following example defines a new Signal class called <code class="docutils literal notranslate"><span class="pre">MySummingSignal</span></code>
 which will sum its sibling component values “a” “b” and “c”.  This assumes
 it’s used in a Device hierarchy with those components defined appropriately.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MySummingSignal</span><span class="p">(</span><span class="n">AggregateSignal</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySummingSignal</span><span class="p">(</span><span class="n">AggregateSignal</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_signal_by_attr_name</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_calc_readback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_readback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">sig</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signals</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
 
-<span class="k">class</span> <span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsSignalRO</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsSignalRO</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">)</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsSignalRO</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">)</span>
@@ -189,7 +189,7 @@ signal.</p>
 <h3>Example<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>Acquire up to 10 data points from <code class="docutils literal notranslate"><span class="pre">raw_signal</span></code>, perform the arithmetic mean,
 and show its value in <code class="docutils literal notranslate"><span class="pre">averaged</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">raw_signal</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsSignalRO</span><span class="p">,</span> <span class="s2">&quot;OTHER:SIGNAL&quot;</span><span class="p">)</span>
     <span class="n">averaged</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">AvgSignal</span><span class="p">,</span> <span class="n">signal</span><span class="o">=</span><span class="s2">&quot;raw_signal&quot;</span><span class="p">,</span> <span class="n">averages</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
@@ -257,7 +257,7 @@ This will be mapped onto the <a class="reference internal" href="generated/pcdsd
 value held in fValue on the PLC.</p></li>
 </ul>
 <p>You would use the following component to match this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">ophyd</span><span class="o">.</span><span class="n">Component</span><span class="p">(</span>
         <span class="n">PytmcSignal</span><span class="p">,</span>
         <span class="s2">&quot;:fValue&quot;</span><span class="p">,</span>    <span class="c1"># &lt;-- copy in &quot;:fValue&quot; from above</span>
@@ -292,7 +292,7 @@ check with <code class="docutils literal notranslate"><span class="pre">dev.valu
 in fValue on the PLC.</p></li>
 </ul>
 <p>You would use the following component to match this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyDevice</span><span class="p">(</span><span class="n">ophyd</span><span class="o">.</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">ophyd</span><span class="o">.</span><span class="n">Component</span><span class="p">(</span>
         <span class="n">PytmcSignal</span><span class="p">,</span>
         <span class="s2">&quot;:fValue&quot;</span><span class="p">,</span>   <span class="c1"># &lt;-- copy in &quot;:fValue&quot; from above</span>
@@ -331,10 +331,10 @@ in a subclass.</p></li>
 <h3>A read-only MultiDerivedSignalRO<a class="headerlink" href="#a-read-only-multiderivedsignalro" title="Link to this heading"></a></h3>
 <p>This read-only example takes three signals from its parent device - “a”, “b”,
 and “c” - and calculates a single value for them.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcdsdevices.type_hints</span> <span class="kn">import</span> <span class="n">SignalToValue</span><span class="p">,</span> <span class="n">OphydDataType</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pcdsdevices.type_hints</span><span class="w"> </span><span class="kn">import</span> <span class="n">SignalToValue</span><span class="p">,</span> <span class="n">OphydDataType</span>
 
-<span class="k">class</span> <span class="nc">MdsReadOnlyExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">SignalToValue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MdsReadOnlyExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">SignalToValue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
     <span class="n">mds</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span>
@@ -360,11 +360,11 @@ and “c” - and calculates a single value for them.</p>
 </section>
 <section id="a-read-write-multiderivedsignal">
 <h3>A read-write MultiDerivedSignal<a class="headerlink" href="#a-read-write-multiderivedsignal" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MdsReadWriteExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">SignalToValue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MdsReadWriteExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">SignalToValue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">_on_put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">OphydDataType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SignalToValue</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mds</span><span class="p">:</span> <span class="n">MultiDerivedSignal</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">OphydDataType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SignalToValue</span><span class="p">:</span>
         <span class="n">to_write</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">a</span><span class="p">:</span> <span class="n">to_write</span><span class="p">,</span>
@@ -409,7 +409,7 @@ sources its information from another existing signal) which allows you to
 change the units of the source signal into the units of your choice.</p>
 <section id="unitconversionderivedsignal-example">
 <h3>UnitConversionDerivedSignal Example<a class="headerlink" href="#unitconversionderivedsignal-example" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">UcdsExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">UcdsExample</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
     <span class="n">original</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span>
         <span class="n">EpicsSignal</span><span class="p">,</span>
         <span class="s2">&quot;PV&quot;</span><span class="p">,</span>
@@ -490,7 +490,7 @@ can include timestamps, units, enum information, and so on.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, SLAC National Accelerator Laboratory.</p>
+    <p>&#169; Copyright 2025, SLAC National Accelerator Laboratory.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

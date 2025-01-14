@@ -6,15 +6,15 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pcdsdevices.device.InterfaceDevice &mdash; PCDS Devices 8.6.1.dev172+gaf3a7e77 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+  <title>pcdsdevices.device.InterfaceDevice &mdash; PCDS Devices 8.7.1.dev10+gbec57ae1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/_static/theme_overrides.css" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7a7007f6"></script>
+      <script src="../_static/documentation_options.js?v=8f76444c"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/docs-versions-menu.js?v=3d6a1aea"></script>
@@ -200,11 +200,11 @@ re-use the same objects in different ways without needing to duplicate
 their constructor arguments.</p>
 <p>These pre-instantiated objects can be included by adding them as
 <code class="xref any docutils literal notranslate"><span class="pre">InterfaceComponent</span></code> attributes in the class definition like so:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ophyd.signal</span> <span class="kn">import</span> <span class="n">Signal</span>
-<span class="kn">from</span> <span class="nn">pcdsdevices.device</span> <span class="kn">import</span> <span class="p">(</span><span class="n">InterfaceDevice</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ophyd.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Signal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcdsdevices.device</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">InterfaceDevice</span><span class="p">,</span>
                                 <span class="n">InterfaceComponent</span> <span class="k">as</span> <span class="n">ICpt</span><span class="p">)</span>
 
-<span class="k">class</span> <span class="nc">MyDevice</span><span class="p">(</span><span class="n">InterfaceDevice</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDevice</span><span class="p">(</span><span class="n">InterfaceDevice</span><span class="p">):</span>
     <span class="n">my_component</span> <span class="o">=</span> <span class="n">ICpt</span><span class="p">(</span><span class="n">Signal</span><span class="p">)</span>
 
 <span class="n">my_signal</span> <span class="o">=</span> <span class="n">Signal</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;my_signal&#39;</span><span class="p">)</span>
@@ -369,7 +369,7 @@ as complete when the device is ready to be read.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, SLAC National Accelerator Laboratory.</p>
+    <p>&#169; Copyright 2025, SLAC National Accelerator Laboratory.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

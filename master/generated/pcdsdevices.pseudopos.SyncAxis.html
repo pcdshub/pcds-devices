@@ -6,15 +6,15 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pcdsdevices.pseudopos.SyncAxis &mdash; PCDS Devices 8.6.1.dev172+gaf3a7e77 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+  <title>pcdsdevices.pseudopos.SyncAxis &mdash; PCDS Devices 8.7.1.dev10+gbec57ae1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/_static/theme_overrides.css" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7a7007f6"></script>
+      <script src="../_static/documentation_options.js?v=8f76444c"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../_static/docs-versions-menu.js?v=3d6a1aea"></script>
@@ -217,7 +217,7 @@ to the same value when the sync motor is moved. That is to say, a scale of
 <p>You should subclass this by adding real motors as components. The class
 will pick them up and include them correctly into the coordinated move.</p>
 <p>An example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Parallel</span><span class="p">(</span><span class="n">SyncAxis</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Parallel</span><span class="p">(</span><span class="n">SyncAxis</span><span class="p">):</span>
     <span class="n">left</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsMotor</span><span class="p">,</span> <span class="s1">&#39;:01&#39;</span><span class="p">)</span>
     <span class="n">right</span> <span class="o">=</span> <span class="n">Cpt</span><span class="p">(</span><span class="n">EpicsMotor</span><span class="p">,</span> <span class="s1">&#39;:02&#39;</span><span class="p">)</span>
 </pre></div>
@@ -977,7 +977,7 @@ defined in (i.e., in series)</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, SLAC National Accelerator Laboratory.</p>
+    <p>&#169; Copyright 2025, SLAC National Accelerator Laboratory.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
